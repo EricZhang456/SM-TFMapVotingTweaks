@@ -27,7 +27,8 @@ StringMap g_MapNameReference;
 // Contains list of all maps from ServerMapCycle stringtable for restore on unload.
 ArrayList g_FullMapList;
 
-ConVar g_ConVarNextLevelAsNominate, g_ConVarEnforceExclusions;
+/* ConVar g_ConVarNextLevelAsNominate, g_ConVarEnforceExclusions; */
+Convar g_ConVarNextLevelAsNominate;
 
 int g_iMapCycleStringTable, g_iMapCycleStringTableIndex;
 bool g_bFinalizedMapCycleTable;
@@ -45,9 +46,9 @@ public void OnPluginStart() {
 			"Specifies if the next map vote should set the sm_nextmap varible instead.", _,
 			true, 0.0, true, 1.0);
 	
-	g_ConVarEnforceExclusions = CreateConVar("sm_tfmapvote_exclude", "1",
+	/* g_ConVarEnforceExclusions = CreateConVar("sm_tfmapvote_exclude", "1",
 			"Specifies if recent maps should be removed from the vote menu.", _, true, 0.0,
-			true, 1.0);
+			true, 1.0); */
 	
 	g_FullMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
 	g_MapNameReference = new StringMap();
@@ -138,7 +139,6 @@ public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType,
 	if (true || g_ConVarNextLevelAsNominate.BoolValue) {
 		SetNextMap(map);
 		return Plugin_Handled;
-	}
 	return Plugin_Continue;
 }
 
