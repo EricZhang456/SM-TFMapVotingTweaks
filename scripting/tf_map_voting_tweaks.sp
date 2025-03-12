@@ -1,7 +1,7 @@
 #pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
-#include <mapchooser>
+/* #include <mapchooser> */
 
 #include <nativevotes>
 
@@ -10,10 +10,10 @@
 #define PLUGIN_VERSION "0.2.1"
 public Plugin myinfo = {
     name = "[TF2] Map Voting Tweaks",
-    author = "nosoop",
+    author = "nosoop, Eric Zhang",
     description = "Modifications to TF2's native map vote system.",
     version = PLUGIN_VERSION,
-    url = "https://github.com/nosoop"
+    url = "https://github.com/EricZhang456/SM-TFMapVotingTweaks"
 }
 
 #define TABLE_SERVER_MAP_CYCLE "ServerMapCycle"
@@ -41,8 +41,8 @@ public void OnPluginStart() {
 	CreateConVar("sm_tfmapvote_version", PLUGIN_VERSION,
 			"Current version of Map Voting Tweaks.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	
-	g_ConVarNextLevelAsNominate = CreateConVar("sm_tfmapvote_nominate", "1",
-			"Specifies if the map vote menu is treated as a SourceMod nomination menu.", _,
+	g_ConVarNextLevelAsNominate = CreateConVar("sm_tfmapvote_sm_nextmap", "1",
+			"Specifies if the next map vote should set the sm_nextmap varible instead.", _,
 			true, 0.0, true, 1.0);
 	
 	g_ConVarEnforceExclusions = CreateConVar("sm_tfmapvote_exclude", "1",
@@ -129,19 +129,34 @@ public void OnClientPostAdminCheck(int iClient) {
 }
 
 /**
- * Overrides the next level vote call with a nomination.
+ * Overrides the next level vote call with a sm_nextmap override.
  */
 public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType,
 		const char[] voteArgument) {
 	char map[MAP_SANE_NAME_LENGTH];
 	ResolveMapDisplayName(voteArgument, map, sizeof(map));
 	if (true || g_ConVarNextLevelAsNominate.BoolValue) {
-		ProcessMapNomination(client, map);
+		SetNextMap(map);
 		return Plugin_Handled;
-	} else {
-		// TODO perform standard Valve NextLevel vote
 	}
 	return Plugin_Continue;
+}
+
+/**
+ * Overrides the change level vote call with an immediate map switch.
+ */
+public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType,
+		const char[] voteArgument) {
+	char map[MAP_SANE_NAME_LENGTH];
+	ResolveMapDisplayName(voteArgument, map, sizeof(map))
+
+	if (CommandExists("sm_map")) {
+		FakeClientCommand(client, "sm_map %s", map);
+	} else {
+		ForceChangeLevel(map, "Changing map");
+	}
+
+	return Plugin_Handled;
 }
 
 /**
@@ -157,6 +172,10 @@ public Action VisCheck_AdminChangeLevelVote(int client, NativeVotesOverride over
 /**
  * Admin "changelevel" allows admin to immediately change to the next level
  */
+
+/* not needed */ 
+
+/* 
 public Action OnAdminChangeLevelVoteCall(int client, NativeVotesOverride overrideType,
 		const char[] voteArgument) {
 	char map[MAP_SANE_NAME_LENGTH];
@@ -170,11 +189,15 @@ public Action OnAdminChangeLevelVoteCall(int client, NativeVotesOverride overrid
 	
 	return Plugin_Handled;
 }
-
+*/
 
 /**
  * Performs a map nomination, given a vote-calling client and a full map name.
  */
+
+/* not needed */
+
+/*
 void ProcessMapNomination(int iClient, const char[] nominatedMap) {
 	ArrayList excludeMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
 	GetExcludeMapList(excludeMapList);
@@ -237,6 +260,7 @@ void WriteServerMapCycleToStringTable(ArrayList mapCycle) {
 			dataLength);
 	LockStringTables(bPreviousState);
 }
+*/
 
 /**
  * Modifies the ServerMapCycle stringtable to provide shorthand map names.
@@ -248,8 +272,8 @@ void ProcessServerMapCycleStringTable() {
 	
 	ArrayList maps = ReadServerMapCycleFromStringTable();
 	
-	ArrayList excludeMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
-	GetExcludeMapList(excludeMapList);
+	/* ArrayList excludeMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
+	GetExcludeMapList(excludeMapList); */
 	
 	/**
 	 * Map cycle isn't finalized, and if this is not the first run through some maps might have
@@ -265,9 +289,9 @@ void ProcessServerMapCycleStringTable() {
 		GetMapDisplayName(mapBuffer, shortMapBuffer, sizeof(shortMapBuffer));
 		
 		// Map is excluded
-		if (excludeMapList.FindString(mapBuffer) > -1 && g_ConVarEnforceExclusions.BoolValue) {
+		/* if (excludeMapList.FindString(mapBuffer) > -1 && g_ConVarEnforceExclusions.BoolValue) {
 			continue;
-		}
+		} */
 		
 		if (!StrEqual(shortMapBuffer, mapBuffer, false)
 				&& g_MapNameReference.SetString(shortMapBuffer, mapBuffer, true)) {
@@ -284,7 +308,7 @@ void ProcessServerMapCycleStringTable() {
 	
 	delete newMaps;
 	delete maps;
-	delete excludeMapList;
+	/* delete excludeMapList; */
 }
 
 /**
@@ -363,8 +387,9 @@ void OnNativeVotesLoaded() {
 	g_bNativeVotesLoaded = true;
 	
 	NativeVotes_RegisterVoteCommand(NativeVotesOverride_NextLevel, OnNextLevelVoteCall);
-	NativeVotes_RegisterVoteCommand(NativeVotesOverride_ChgLevel, OnAdminChangeLevelVoteCall,
-			VisCheck_AdminChangeLevelVote);
+	NativeVotes_RegisterVoteCommand(NativeVotesOverride_ChgLevel, OnChangeLevelVoteCall);
+/* 	NativeVotes_RegisterVoteCommand(NativeVotesOverride_ChgLevel, OnAdminChangeLevelVoteCall,
+			VisCheck_AdminChangeLevelVote); */
 	
 	// TODO unload support?
 }
