@@ -132,42 +132,70 @@ public void OnClientPostAdminCheck(int iClient) {
 /**
  * Overrides the next level vote call with a sm_nextmap override.
  */
-public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType,
-		const char[] voteArgument) {
-	char map[MAP_SANE_NAME_LENGTH];
-	ResolveMapDisplayName(voteArgument, map, sizeof(map));
-	if (true || g_ConVarNextLevelAsNominate.BoolValue) {
-		SetNextMap(map);
-		return Plugin_Handled;
-	return Plugin_Continue;
-}
-
-/**
- * Overrides the change level vote call with an immediate map switch.
- */
-public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType,
-		const char[] voteArgument) {
-	char map[MAP_SANE_NAME_LENGTH];
-	ResolveMapDisplayName(voteArgument, map, sizeof(map))
-
-	if (CommandExists("sm_map")) {
-		FakeClientCommand(client, "sm_map %s", map);
-	} else {
-		ForceChangeLevel(map, "Changing map");
-	}
+public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
+	new Handle:vote = NatievVotes_Create(MapVoteHandler, NativeVotesType_NextLevel);
+	NativeVotes_SetInitiator(vote, client);
+	NativeVotes_SetDetails(voteArgument);
+	NativeVotes_DisplayToAll(vote, 30);
 
 	return Plugin_Handled;
 }
 
 /**
+ * Overrides the change level vote call with an immediate map switch.
+ */
+public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
+	new Handle:vote = NatievVotes_Create(MapVoteHandler, NativeVotesType_ChgLevel);
+	NativeVotes_SetInitiator(vote, client);
+	NativeVotes_SetDetails(voteArgument);
+	NativeVotes_DisplayToAll(vote, 30);
+
+	return Plugin_Handled;
+}
+
+/**
+ * Handles map votes
+ */
+void MapVoteHandler ( Handle:vote, MenuAction:action, client, items ) {
+	NativeVotes_GetDetails( vote, char[] DisplayMap, MAP_SANE_NAME_LENGTH );
+	char map[MAP_SANE_NAME_LENGTH];
+	ResolveMapDisplayName (DisplayMap, map, sizeof(map));
+
+	switch ( action ) {
+		case MenuAction_End: {
+			NativeVotes_Close(vote);
+		}
+
+		case MenuAction_VoteCancel: {
+			if ( client == VoteCancel_NoVotes ) {
+				NativeVotes_DisplayFail(vote, NativeVotesFail_NotEnoughVotes);
+			} else {
+				NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
+			}
+		}
+
+		case MenuAction_VoteEnd: {
+			if ( client == NATIVEVOTES_VOTE_NO ) {
+				NativeVotes_DisplayFail(vote, NativeVotesFail_Loses);
+			} else {
+				SetNextMap(map);
+				if ( NativeVotes_GetType(vote) == 'NativeVotesType_ChgLevel' ) {
+					FakeClientCommand(client, "changelevel_next");
+				}
+			}
+		}
+	}
+}
+
+/**
  * Sets visibility of admin's "changelevel" voting menu.
  */
-public Action VisCheck_AdminChangeLevelVote(int client, NativeVotesOverride overrideType) {
+/* public Action VisCheck_AdminChangeLevelVote(int client, NativeVotesOverride overrideType) {
 	if (CheckCommandAccess(client, "sm_map", ADMFLAG_CHANGEMAP)) {
 		return Plugin_Continue;
 	}
 	return Plugin_Stop;
-}
+} *.
 
 /**
  * Admin "changelevel" allows admin to immediately change to the next level
