@@ -126,7 +126,12 @@ public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, 
 	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_NextLevel);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(vote, voteArgument);
-	NativeVotes_DisplayToAll(vote, 15);
+	bool result = NativeVotes_DisplayToAll(vote, 15);
+
+	if (!result) {
+		NativeVotes_Cancel();
+		NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
+	}
 
 	return Plugin_Handled;
 }
@@ -138,7 +143,12 @@ public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType
 	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_ChgLevel);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(vote, voteArgument);
-	NativeVotes_DisplayToAll(vote, 15);
+	bool result = NativeVotes_DisplayToAll(vote, 15);
+
+	if (!result) {
+ 	    NativeVotes_Cancel();
+  	    NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
+	}
 
 	return Plugin_Handled;
 }
