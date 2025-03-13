@@ -205,8 +205,8 @@ void WriteServerMapCycleToStringTable(ArrayList mapCycle) {
 }
 
 public Action ChangeLevel(Handle timer, char[] map) {
-	ForceChangeLevel(map, "Changing map due to vote");
-	return Plugin_Continue;
+	ServerCommand("changelevel_next");
+	return Plugin_Stop;
 }
 
 /**
@@ -235,11 +235,11 @@ public int MapVoteHandler(Handle vote, MenuAction action, int client, int items 
 			if (client == NATIVEVOTES_VOTE_NO || client == NATIVEVOTES_VOTE_INVALID) {
 				NativeVotes_DisplayFail(vote, NativeVotesFail_Loses);
 			} else {
+				SetNextMap(map);
 				if (NativeVotes_GetType(vote) == NativeVotesType_ChgLevel) {
 					NativeVotes_DisplayPassEx(vote, NativeVotesPass_ChgLevel, DisplayMap);
-					CreateTimer(2.0, ChangeLevel, map);
+					CreateTimer(2.0, ChangeLevel);
 				} else {
-					SetNextMap(map);
 					NativeVotes_DisplayPassEx(vote, NativeVotesPass_NextLevel, DisplayMap);
 				}
 			}
