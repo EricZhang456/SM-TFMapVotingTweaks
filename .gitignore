@@ -1,1 +1,5 @@
 *.smx
+scripting/include/
+scripting/compiled/
+scripting/spcomp*
+scripting/compile.sh
