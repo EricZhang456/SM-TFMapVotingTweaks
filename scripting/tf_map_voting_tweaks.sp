@@ -179,6 +179,7 @@ void WriteServerMapCycleToStringTable(ArrayList mapCycle) {
 
 public Action ChangeLevel(Handle timer, char[] map) {
 	ForceChangeLevel(map, "Changing map due to vote");
+	return Plugin_Continue;
 }
 
 /**
