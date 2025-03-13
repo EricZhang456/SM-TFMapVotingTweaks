@@ -177,7 +177,7 @@ void WriteServerMapCycleToStringTable(ArrayList mapCycle) {
 	LockStringTables(bPreviousState);
 }
 
-public void ChangeLevel(Handle timer, char[] map) {
+public Action ChangeLevel(Handle timer, char[] map) {
 	ForceChangeLevel(map, "Changing map due to vote");
 }
 
