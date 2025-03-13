@@ -2,7 +2,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <nextmap>
-#include <timer>
+#include <timers>
 
 #include <nativevotes>
 
