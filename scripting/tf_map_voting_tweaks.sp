@@ -138,7 +138,7 @@ public void OnClientPostAdminCheck(int iClient) {
 }
 
 void StartMapVote(NativeVotesType voteType, int client, const char[] voteArgument) {
-	Handle vote = NativeVoetes_Create(MapVoteHandler, voteType);
+	Handle vote = NativeVotes_Create(MapVoteHandler, voteType);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(vote, voteArgument);
 	if (NativeVotes_IsVoteInProgress()) {
