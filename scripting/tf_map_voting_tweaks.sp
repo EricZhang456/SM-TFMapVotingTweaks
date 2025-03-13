@@ -33,6 +33,8 @@ bool g_bFinalizedMapCycleTable;
 
 bool g_bNativeVotesLoaded;
 
+bool g_ServerWaitingForPlayers = false;
+
 public void OnPluginStart() {
 	LoadTranslations("common.phrases");
 	LoadTranslations("nominations.phrases");
@@ -107,6 +109,14 @@ public void OnPluginEnd() {
 	}
 }
 
+public void TF2_OnWaitingForPlayersStart() {
+	g_ServerWaitingForPlayers = true;
+}
+
+public void TF2_OnWaitingForPlayersStart() {
+	g_ServerWaitingForPlayers = false;
+}
+
 public void OnClientPostAdminCheck(int iClient) {
 	/**
 	 * Processing the table during an actual OnMapStart leaves short map workshop names that
@@ -128,7 +138,7 @@ public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, 
 	NativeVotes_SetDetails(vote, voteArgument);
 	bool result = NativeVotes_DisplayToAll(vote, 15);
 
-	if (!result) {
+	if (!result || g_ServerWaitingForPlayers) {
 		NativeVotes_Cancel();
 		NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
 	}
@@ -145,7 +155,7 @@ public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType
 	NativeVotes_SetDetails(vote, voteArgument);
 	bool result = NativeVotes_DisplayToAll(vote, 15);
 
-	if (!result) {
+	if (!result || g_ServerWaitingForPlayers) {
  	    NativeVotes_Cancel();
   	    NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
 	}
@@ -205,12 +215,12 @@ public int MapVoteHandler(Handle vote, MenuAction action, int client, int items 
 		}
 
 		case MenuAction_VoteEnd: {
-			if (client == NATIVEVOTES_VOTE_NO) {
+			if (client == NATIVEVOTES_VOTE_NO || client == NATIVEVOTES_VOTE_INVALID) {
 				NativeVotes_DisplayFail(vote, NativeVotesFail_Loses);
 			} else {
 				if (NativeVotes_GetType(vote) == NativeVotesType_ChgLevel) {
 					NativeVotes_DisplayPassEx(vote, NativeVotesPass_ChgLevel, DisplayMap);
-					CreateTimer(3.0, ChangeLevel, map);
+					CreateTimer(2.0, ChangeLevel, map);
 				} else {
 					SetNextMap(map);
 					NativeVotes_DisplayPassEx(vote, NativeVotesPass_NextLevel, DisplayMap);
