@@ -241,6 +241,7 @@ public int MapVoteHandler(Handle vote, MenuAction action, int client, int items 
 					CreateTimer(2.0, ChangeLevel);
 				} else {
 					NativeVotes_DisplayPassEx(vote, NativeVotesPass_NextLevel, DisplayMap);
+					g_bNextLevelAlreadySet = true;
 				}
 			}
 		}
