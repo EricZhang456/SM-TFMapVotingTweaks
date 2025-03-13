@@ -145,6 +145,30 @@ public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType
 	return Plugin_Handled;
 }
 
+ArrayList ReadServerMapCycleFromStringTable() {
+	int dataLength = GetStringTableDataLength(g_iMapCycleStringTable,
+			g_iMapCycleStringTableIndex);
+	
+	char[] mapData = new char[dataLength];
+	
+	GetStringTableData(g_iMapCycleStringTable, g_iMapCycleStringTableIndex, mapData,
+			dataLength);
+	
+	return ArrayListFromStringLines(mapData);
+}
+
+void WriteServerMapCycleToStringTable(ArrayList mapCycle) {
+	PrintToServer("Writing %d maps to stringtable", mapCycle.Length);
+	int dataLength = mapCycle.Length * MAP_SANE_NAME_LENGTH;
+	char[] newMapData = new char[dataLength];
+	StringLinesFromArrayList(mapCycle, newMapData, dataLength);
+	
+	bool bPreviousState = LockStringTables(false);
+	SetStringTableData(g_iMapCycleStringTable, g_iMapCycleStringTableIndex, newMapData,
+			dataLength);
+	LockStringTables(bPreviousState);
+}
+
 /**
  * Handles map votes
  */
