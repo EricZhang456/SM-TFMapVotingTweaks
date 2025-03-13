@@ -130,7 +130,7 @@ public void OnClientPostAdminCheck(int iClient) {
 public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
 	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_NextLevel);
 	NativeVotes_SetInitiator(vote, client);
-	NativeVotes_SetDetails(voteArgument);
+	NativeVotes_SetDetails(vote, voteArgument);
 	NativeVotes_DisplayToAll(vote, g_ConVarMapVoteDuration.IntValue);
 
 	return Plugin_Handled;
@@ -142,7 +142,7 @@ public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, 
 public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
 	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_ChgLevel);
 	NativeVotes_SetInitiator(vote, client);
-	NativeVotes_SetDetails(voteArgument);
+	NativeVotes_SetDetails(vote, voteArgument);
 	NativeVotes_DisplayToAll(vote, g_ConVarMapVoteDuration.IntValue);
 
 	return Plugin_Handled;
