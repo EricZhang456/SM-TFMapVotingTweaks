@@ -148,8 +148,9 @@ public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType
 /**
  * Handles map votes
  */
-void MapVoteHandler(Handle:vote, MenuAction:action, client, items ) {
-	NativeVotes_GetDetails(vote, char[] DisplayMap, MAP_SANE_NAME_LENGTH);
+void MapVoteHandler(Handle vote, MenuAction action, int client, int items ) {
+	char DisplayMap[MAP_SANE_NAME_LENGTH];
+	NativeVotes_GetDetails(vote, DisplayMap, sizeof(DisplayMap));
 	char map[MAP_SANE_NAME_LENGTH];
 	ResolveMapDisplayName(DisplayMap, map, sizeof(map));
 
@@ -172,7 +173,7 @@ void MapVoteHandler(Handle:vote, MenuAction:action, client, items ) {
 			} else {
 				NativeVotes_DisplayPassEx(vote, NativeVotes_GetType(vote), DisplayMap);
 				SetNextMap(map);
-				if ( NativeVotes_GetType(vote) == 'NativeVotesType_ChgLevel' ) {
+				if ( NativeVotes_GetType(vote) == "NativeVotesType_ChgLevel" ) {
 					CreateTimer(1.0, FakeClientCommand(client, "changelevel_next"));
 				}
 			}
