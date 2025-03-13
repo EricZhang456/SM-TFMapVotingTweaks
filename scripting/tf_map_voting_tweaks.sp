@@ -3,7 +3,6 @@
 #include <sdktools>
 #include <nextmap>
 #include <timer>
-/* #include <mapchooser> */
 
 #include <nativevotes>
 
@@ -42,14 +41,6 @@ public void OnPluginStart() {
 	
 	CreateConVar("sm_tfmapvote_version", PLUGIN_VERSION,
 			"Current version of Map Voting Tweaks.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
-	
-	/* g_ConVarNextLevelAsNominate = CreateConVar("sm_tfmapvote_sm_nextmap", "1",
-			"Specifies if the next map vote should set the sm_nextmap varible instead.", _,
-			true, 0.0, true, 1.0); */
-	
-	/* g_ConVarEnforceExclusions = CreateConVar("sm_tfmapvote_exclude", "1",
-			"Specifies if recent maps should be removed from the vote menu.", _, true, 0.0,
-			true, 1.0); */
 	
 	g_FullMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
 	g_MapNameReference = new StringMap();
@@ -190,109 +181,6 @@ void MapVoteHandler(Handle:vote, MenuAction:action, client, items ) {
 }
 
 /**
- * Sets visibility of admin's "changelevel" voting menu.
- */
-/* public Action VisCheck_AdminChangeLevelVote(int client, NativeVotesOverride overrideType) {
-	if (CheckCommandAccess(client, "sm_map", ADMFLAG_CHANGEMAP)) {
-		return Plugin_Continue;
-	}
-	return Plugin_Stop;
-} *.
-
-/**
- * Admin "changelevel" allows admin to immediately change to the next level
- */
-
-/* not needed */ 
-
-/* 
-public Action OnAdminChangeLevelVoteCall(int client, NativeVotesOverride overrideType,
-		const char[] voteArgument) {
-	char map[MAP_SANE_NAME_LENGTH];
-	ResolveMapDisplayName(voteArgument, map, sizeof(map));
-	
-	if (CommandExists("sm_map")) {
-		FakeClientCommand(client, "sm_map %s", map);
-	} else {
-		ForceChangeLevel(map, "Admin changelevel vote");
-	}
-	
-	return Plugin_Handled;
-}
-*/
-
-/**
- * Performs a map nomination, given a vote-calling client and a full map name.
- */
-
-/* not needed */
-
-/*
-void ProcessMapNomination(int iClient, const char[] nominatedMap) {
-	ArrayList excludeMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
-	GetExcludeMapList(excludeMapList);
-
-	bool bMapIsExcluded = excludeMapList.FindString(nominatedMap) > -1;
-	delete excludeMapList;
-	
-	if (bMapIsExcluded) {
-		PrintToChat(iClient, "%t", "Map in Exclude List");
-		return;
-	}
-	
-	NominateResult result = NominateMap(nominatedMap, false, iClient);
-	
-	char name[64];
-	GetClientName(iClient, name, sizeof(name));
-	
-	char nominatedMapDisplay[MAP_SANE_NAME_LENGTH];
-	GetMapDisplayName(nominatedMap, nominatedMapDisplay, sizeof(nominatedMapDisplay));
-	
-	switch (result) {
-		case Nominate_VoteFull: {
-			PrintToChat(iClient, "%t", "Max Nominations");
-		}
-		case Nominate_InvalidMap: {
-			PrintToChat(iClient, "%t", "Map was not found", nominatedMapDisplay);
-		}
-		case Nominate_AlreadyInVote: {
-			PrintToChat(iClient, "%t", "Map Already Nominated");
-		}
-		case Nominate_Replaced: {
-			PrintToChatAll("%t", "Map Nomination Changed", name, nominatedMapDisplay);
-		}
-		case Nominate_Added: {
-			PrintToChatAll("%t", "Map Nominated", name, nominatedMapDisplay);
-		}
-	}
-}
-
-ArrayList ReadServerMapCycleFromStringTable() {
-	int dataLength = GetStringTableDataLength(g_iMapCycleStringTable,
-			g_iMapCycleStringTableIndex);
-	
-	char[] mapData = new char[dataLength];
-	
-	GetStringTableData(g_iMapCycleStringTable, g_iMapCycleStringTableIndex, mapData,
-			dataLength);
-	
-	return ArrayListFromStringLines(mapData);
-}
-
-void WriteServerMapCycleToStringTable(ArrayList mapCycle) {
-	PrintToServer("Writing %d maps to stringtable", mapCycle.Length);
-	int dataLength = mapCycle.Length * MAP_SANE_NAME_LENGTH;
-	char[] newMapData = new char[dataLength];
-	StringLinesFromArrayList(mapCycle, newMapData, dataLength);
-	
-	bool bPreviousState = LockStringTables(false);
-	SetStringTableData(g_iMapCycleStringTable, g_iMapCycleStringTableIndex, newMapData,
-			dataLength);
-	LockStringTables(bPreviousState);
-}
-*/
-
-/**
  * Modifies the ServerMapCycle stringtable to provide shorthand map names.
  */
 void ProcessServerMapCycleStringTable() {
@@ -301,9 +189,6 @@ void ProcessServerMapCycleStringTable() {
 	}
 	
 	ArrayList maps = ReadServerMapCycleFromStringTable();
-	
-	/* ArrayList excludeMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
-	GetExcludeMapList(excludeMapList); */
 	
 	/**
 	 * Map cycle isn't finalized, and if this is not the first run through some maps might have
@@ -317,11 +202,6 @@ void ProcessServerMapCycleStringTable() {
 		g_FullMapList.GetString(m, mapBuffer, sizeof(mapBuffer));
 		
 		GetMapDisplayName(mapBuffer, shortMapBuffer, sizeof(shortMapBuffer));
-		
-		// Map is excluded
-		/* if (excludeMapList.FindString(mapBuffer) > -1 && g_ConVarEnforceExclusions.BoolValue) {
-			continue;
-		} */
 		
 		if (!StrEqual(shortMapBuffer, mapBuffer, false)
 				&& g_MapNameReference.SetString(shortMapBuffer, mapBuffer, true)) {
@@ -338,7 +218,6 @@ void ProcessServerMapCycleStringTable() {
 	
 	delete newMaps;
 	delete maps;
-	/* delete excludeMapList; */
 }
 
 /**
@@ -418,8 +297,6 @@ void OnNativeVotesLoaded() {
 	
 	NativeVotes_RegisterVoteCommand(NativeVotesOverride_NextLevel, OnNextLevelVoteCall);
 	NativeVotes_RegisterVoteCommand(NativeVotesOverride_ChgLevel, OnChangeLevelVoteCall);
-/* 	NativeVotes_RegisterVoteCommand(NativeVotesOverride_ChgLevel, OnAdminChangeLevelVoteCall,
-			VisCheck_AdminChangeLevelVote); */
 	
 	// TODO unload support?
 }
