@@ -125,7 +125,7 @@ public void OnClientPostAdminCheck(int iClient) {
  * Overrides the next level vote call with a sm_nextmap override.
  */
 public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
-	new Handle:vote = NatievVotes_Create(MapVoteHandler, NativeVotesType_NextLevel);
+	Handle vote = NatievVotes_Create(MapVoteHandler, NativeVotesType_NextLevel);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(voteArgument);
 	NativeVotes_DisplayToAll(vote, 30);
@@ -137,7 +137,7 @@ public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, 
  * Overrides the change level vote call with an immediate map switch.
  */
 public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
-	new Handle:vote = NatievVotes_Create(MapVoteHandler, NativeVotesType_ChgLevel);
+	Handle vote = NatievVotes_Create(MapVoteHandler, NativeVotesType_ChgLevel);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(voteArgument);
 	NativeVotes_DisplayToAll(vote, 30);
