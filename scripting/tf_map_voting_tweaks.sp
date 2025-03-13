@@ -3,6 +3,7 @@
 #include <sdktools>
 #include <nextmap>
 #include <timers>
+#include <clients>
 
 #include <nativevotes>
 
@@ -33,7 +34,11 @@ bool g_bFinalizedMapCycleTable;
 
 bool g_bNativeVotesLoaded;
 
-bool g_ServerWaitingForPlayers = false;
+ConVar g_cvChangeNextLevelAllowed;
+ConVar g_cvSpecVote;
+
+bool g_bServerWaitingForPlayers = false;
+bool g_bNextLevelAlreadySet = false;
 
 public void OnPluginStart() {
 	LoadTranslations("common.phrases");
@@ -41,6 +46,9 @@ public void OnPluginStart() {
 	
 	CreateConVar("sm_tfmapvote_version", PLUGIN_VERSION,
 			"Current version of Map Voting Tweaks.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
+	
+	g_cvChangeNextLevelAllowed = FindConVar("sv_vote_issue_nextlevel_prevent_change");
+	g_cvSpecVote = FindConVar("sv_vote_allow_spectators");
 	
 	g_FullMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
 	g_MapNameReference = new StringMap();
@@ -110,11 +118,11 @@ public void OnPluginEnd() {
 }
 
 public void TF2_OnWaitingForPlayersStart() {
-	g_ServerWaitingForPlayers = true;
+	g_bServerWaitingForPlayers = true;
 }
 
-public void TF2_OnWaitingForPlayersStart() {
-	g_ServerWaitingForPlayers = false;
+public void TF2_OnWaitingForPlayersEnd() {
+	g_bServerWaitingForPlayers = false;
 }
 
 public void OnClientPostAdminCheck(int iClient) {
@@ -129,20 +137,42 @@ public void OnClientPostAdminCheck(int iClient) {
 	}
 }
 
+void StartMapVote(NativeVotesType voteType, int client, const char[] voteArgument) {
+	Handle type = NativeVoetes_Create(MapVoteHandler, voteType);
+	NativeVotes_SetInitiator(vote, client);
+	NativeVotes_SetDetails(vote, voteArgument);
+	if (NativeVotes_IsVoteInProgress()) {
+		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Generic);
+		return;
+	} else {
+		if (NativeVotes_CheckVoteDelay() != 0) {
+			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Recent, NativeVotes_CheckVoteDelay());
+			return;
+		}
+	} else {
+		if (g_bServerWaitingForPlayers) {
+			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Waiting);
+			return;
+		}
+	} else {
+		if (g_cvChangeNextLevelAllowed.BoolValue && g_bNextLevelAlreadySet && voteType == NativeVotesType_NextLevel) {
+			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_LevelSet);
+			return;
+		}
+	} else {
+		if ((!g_cvSpecVote.BoolValue && GetClientTeam(client) == 1) || GetClientTeam(client) == 0) {
+			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_WrongTeam);
+			return;
+		}
+	}
+	NativeVotes_DisplayToAll(vote, 15);
+}
+
 /**
  * Overrides the next level vote call with a sm_nextmap override.
  */
 public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
-	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_NextLevel);
-	NativeVotes_SetInitiator(vote, client);
-	NativeVotes_SetDetails(vote, voteArgument);
-	bool result = NativeVotes_DisplayToAll(vote, 15);
-
-	if (!result || g_ServerWaitingForPlayers) {
-		NativeVotes_Cancel();
-		NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
-	}
-
+	StartMapVote(NativeVotesType_NextLevel, client, voteArgument);
 	return Plugin_Handled;
 }
 
@@ -150,16 +180,7 @@ public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, 
  * Overrides the change level vote call with an immediate map switch.
  */
 public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType, const char[] voteArgument) {
-	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_ChgLevel);
-	NativeVotes_SetInitiator(vote, client);
-	NativeVotes_SetDetails(vote, voteArgument);
-	bool result = NativeVotes_DisplayToAll(vote, 15);
-
-	if (!result || g_ServerWaitingForPlayers) {
- 	    NativeVotes_Cancel();
-  	    NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
-	}
-
+	StartMapVote(NativeVotesType_ChgLevel, client, voteArgument);
 	return Plugin_Handled;
 }
 
