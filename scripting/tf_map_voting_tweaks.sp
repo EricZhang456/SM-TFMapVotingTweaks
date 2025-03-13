@@ -138,32 +138,28 @@ public void OnClientPostAdminCheck(int iClient) {
 }
 
 void StartMapVote(NativeVotesType voteType, int client, const char[] voteArgument) {
-	Handle type = NativeVoetes_Create(MapVoteHandler, voteType);
+	Handle vote = NativeVoetes_Create(MapVoteHandler, voteType);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(vote, voteArgument);
 	if (NativeVotes_IsVoteInProgress()) {
 		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Generic);
 		return;
-	} else {
-		if (NativeVotes_CheckVoteDelay() != 0) {
-			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Recent, NativeVotes_CheckVoteDelay());
-			return;
-		}
-	} else {
-		if (g_bServerWaitingForPlayers) {
-			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Waiting);
-			return;
-		}
-	} else {
-		if (g_cvChangeNextLevelAllowed.BoolValue && g_bNextLevelAlreadySet && voteType == NativeVotesType_NextLevel) {
-			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_LevelSet);
-			return;
-		}
-	} else {
-		if ((!g_cvSpecVote.BoolValue && GetClientTeam(client) == 1) || GetClientTeam(client) == 0) {
-			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_WrongTeam);
-			return;
-		}
+	}
+	if (NativeVotes_CheckVoteDelay() != 0) {
+		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Recent, NativeVotes_CheckVoteDelay());
+		return;
+	}
+	if (g_bServerWaitingForPlayers) {
+		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Waiting);
+		return;
+	}
+	if (g_cvChangeNextLevelAllowed.BoolValue && g_bNextLevelAlreadySet && voteType == NativeVotesType_NextLevel) {
+		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_LevelSet);
+		return;
+	}
+	if ((!g_cvSpecVote.BoolValue && GetClientTeam(client) == 1) || GetClientTeam(client) == 0) {
+		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_WrongTeam);
+		return;
 	}
 	NativeVotes_DisplayToAll(vote, 15);
 }
