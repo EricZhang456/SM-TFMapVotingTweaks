@@ -28,7 +28,6 @@ StringMap g_MapNameReference;
 ArrayList g_FullMapList;
 
 /* ConVar g_ConVarNextLevelAsNominate, g_ConVarEnforceExclusions; */
-Convar g_ConVarNextLevelAsNominate;
 
 int g_iMapCycleStringTable, g_iMapCycleStringTableIndex;
 bool g_bFinalizedMapCycleTable;
@@ -42,9 +41,9 @@ public void OnPluginStart() {
 	CreateConVar("sm_tfmapvote_version", PLUGIN_VERSION,
 			"Current version of Map Voting Tweaks.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	
-	g_ConVarNextLevelAsNominate = CreateConVar("sm_tfmapvote_sm_nextmap", "1",
+	/* g_ConVarNextLevelAsNominate = CreateConVar("sm_tfmapvote_sm_nextmap", "1",
 			"Specifies if the next map vote should set the sm_nextmap varible instead.", _,
-			true, 0.0, true, 1.0);
+			true, 0.0, true, 1.0); */
 	
 	/* g_ConVarEnforceExclusions = CreateConVar("sm_tfmapvote_exclude", "1",
 			"Specifies if recent maps should be removed from the vote menu.", _, true, 0.0,
