@@ -1,6 +1,8 @@
 #pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
+#include <nextmap>
+#include <timer>
 /* #include <mapchooser> */
 
 #include <nativevotes>
@@ -155,10 +157,10 @@ public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType
 /**
  * Handles map votes
  */
-void MapVoteHandler ( Handle:vote, MenuAction:action, client, items ) {
-	NativeVotes_GetDetails( vote, char[] DisplayMap, MAP_SANE_NAME_LENGTH );
+void MapVoteHandler(Handle:vote, MenuAction:action, client, items ) {
+	NativeVotes_GetDetails(vote, char[] DisplayMap, MAP_SANE_NAME_LENGTH);
 	char map[MAP_SANE_NAME_LENGTH];
-	ResolveMapDisplayName (DisplayMap, map, sizeof(map));
+	ResolveMapDisplayName(DisplayMap, map, sizeof(map));
 
 	switch ( action ) {
 		case MenuAction_End: {
@@ -177,9 +179,10 @@ void MapVoteHandler ( Handle:vote, MenuAction:action, client, items ) {
 			if ( client == NATIVEVOTES_VOTE_NO ) {
 				NativeVotes_DisplayFail(vote, NativeVotesFail_Loses);
 			} else {
+				NativeVotes_DisplayPassEx(vote, NativeVotes_GetType(vote), DisplayMap);
 				SetNextMap(map);
 				if ( NativeVotes_GetType(vote) == 'NativeVotesType_ChgLevel' ) {
-					FakeClientCommand(client, "changelevel_next");
+					CreateTimer(1.0, FakeClientCommand(client, "changelevel_next"));
 				}
 			}
 		}
