@@ -42,7 +42,7 @@ public void OnPluginStart() {
 	CreateConVar("sm_tfmapvote_version", PLUGIN_VERSION,
 			"Current version of Map Voting Tweaks.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	
-	CreateConVar("sm_tfmapvote_duration", 15.0, 
+	CreateConVar("sm_tfmapvote_duration", "15", 
 			"The duration of a map vote.", FCVAR_NOTIFY, true, 0.0, false);
 	
 	g_FullMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
