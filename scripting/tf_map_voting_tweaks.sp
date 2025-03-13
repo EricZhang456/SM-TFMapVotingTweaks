@@ -28,8 +28,6 @@ StringMap g_MapNameReference;
 // Contains list of all maps from ServerMapCycle stringtable for restore on unload.
 ArrayList g_FullMapList;
 
-ConVar g_ConVarMapVoteDuration;
-
 int g_iMapCycleStringTable, g_iMapCycleStringTableIndex;
 bool g_bFinalizedMapCycleTable;
 
@@ -41,9 +39,6 @@ public void OnPluginStart() {
 	
 	CreateConVar("sm_tfmapvote_version", PLUGIN_VERSION,
 			"Current version of Map Voting Tweaks.", FCVAR_NOTIFY | FCVAR_DONTRECORD);
-	
-	CreateConVar("sm_tfmapvote_duration", "15", 
-			"The duration of a map vote.", FCVAR_NOTIFY, true, 0.0, false);
 	
 	g_FullMapList = new ArrayList(MAP_SANE_NAME_LENGTH);
 	g_MapNameReference = new StringMap();
@@ -131,7 +126,7 @@ public Action OnNextLevelVoteCall(int client, NativeVotesOverride overrideType, 
 	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_NextLevel);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(vote, voteArgument);
-	NativeVotes_DisplayToAll(vote, g_ConVarMapVoteDuration.IntValue);
+	NativeVotes_DisplayToAll(vote, 15);
 
 	return Plugin_Handled;
 }
@@ -143,7 +138,7 @@ public Action OnChangeLevelVoteCall(int client, NativeVotesOverride overrideType
 	Handle vote = NativeVotes_Create(MapVoteHandler, NativeVotesType_ChgLevel);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(vote, voteArgument);
-	NativeVotes_DisplayToAll(vote, g_ConVarMapVoteDuration.IntValue);
+	NativeVotes_DisplayToAll(vote, 15);
 
 	return Plugin_Handled;
 }
