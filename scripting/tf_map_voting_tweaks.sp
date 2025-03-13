@@ -172,10 +172,14 @@ void WriteServerMapCycleToStringTable(ArrayList mapCycle) {
 	LockStringTables(bPreviousState);
 }
 
+public void ChangeLevel(Handle timer, int client) {
+	FakeClientCommand(client, "changelevel_next");
+}
+
 /**
  * Handles map votes
  */
-int MapVoteHandler(Handle vote, MenuAction action, int client, int items ) {
+public int MapVoteHandler(Handle vote, MenuAction action, int client, int items ) {
 	char DisplayMap[MAP_SANE_NAME_LENGTH];
 	NativeVotes_GetDetails(vote, DisplayMap, sizeof(DisplayMap));
 	char map[MAP_SANE_NAME_LENGTH];
@@ -187,7 +191,7 @@ int MapVoteHandler(Handle vote, MenuAction action, int client, int items ) {
 		}
 
 		case MenuAction_VoteCancel: {
-			if ( client == VoteCancel_NoVotes ) {
+			if (client == VoteCancel_NoVotes) {
 				NativeVotes_DisplayFail(vote, NativeVotesFail_NotEnoughVotes);
 			} else {
 				NativeVotes_DisplayFail(vote, NativeVotesFail_Generic);
@@ -195,13 +199,15 @@ int MapVoteHandler(Handle vote, MenuAction action, int client, int items ) {
 		}
 
 		case MenuAction_VoteEnd: {
-			if ( client == NATIVEVOTES_VOTE_NO ) {
+			if (client == NATIVEVOTES_VOTE_NO) {
 				NativeVotes_DisplayFail(vote, NativeVotesFail_Loses);
 			} else {
-				NativeVotes_DisplayPassEx(vote, NativeVotes_GetType(vote), DisplayMap);
 				SetNextMap(map);
-				if ( NativeVotes_GetType(vote) == "NativeVotesType_ChgLevel" ) {
-					CreateTimer(1.0, FakeClientCommand(client, "changelevel_next"));
+				if (NativeVotes_GetType(vote) == NativeVotesType_ChgLevel) {
+					NativeVotes_DisplayPassEx(vote, NativeVotesPass_ChgLevel, DisplayMap);
+					CreateTimer(1.0, ChangeLevel);
+				} else {
+					NativeVotes_DisplayPassEx(vote, NativeVotesPass_NextLevel, DisplayMap);
 				}
 			}
 		}
