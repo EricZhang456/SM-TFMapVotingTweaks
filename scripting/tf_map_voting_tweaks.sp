@@ -4,6 +4,7 @@
 #include <nextmap>
 #include <timers>
 #include <clients>
+#include <string>
 
 #include <nativevotes>
 
@@ -138,27 +139,42 @@ public void OnClientPostAdminCheck(int iClient) {
 }
 
 void StartMapVote(NativeVotesType voteType, int client, const char[] voteArgument) {
+	char map[MAP_SANE_NAME_LENGTH];
+	ResolveMapDisplayName(voteArgument, map, sizeof(map));
+	
 	Handle vote = NativeVotes_Create(MapVoteHandler, voteType);
 	NativeVotes_SetInitiator(vote, client);
 	NativeVotes_SetDetails(vote, voteArgument);
+	// untested
 	if (NativeVotes_IsVoteInProgress()) {
 		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Generic);
 		return;
 	}
+	// works
 	if (NativeVotes_CheckVoteDelay() != 0) {
 		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Recent, NativeVotes_CheckVoteDelay());
 		return;
 	}
+	// works
 	if (g_bServerWaitingForPlayers) {
 		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Waiting);
 		return;
 	}
-	if (g_cvChangeNextLevelAllowed.BoolValue && g_bNextLevelAlreadySet && voteType == NativeVotesType_NextLevel) {
-		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_LevelSet);
+	// doesn't work
+	if (voteType == NativeVotesType_NextLevel) {
+		if (g_cvChangeNextLevelAllowed.BoolValue && g_bNextLevelAlreadySet) {
+			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_LevelSet);
+			return;
+		}
+	}
+	// works
+	if ((!g_cvSpecVote.BoolValue && GetClientTeam(client) == 1) || GetClientTeam(client) == 0) {
+		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Spectators);
 		return;
 	}
-	if ((!g_cvSpecVote.BoolValue && GetClientTeam(client) == 1) || GetClientTeam(client) == 0) {
-		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_WrongTeam);
+	// works
+	if (g_FullMapList.FindString(map) == -1) {
+		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_MapNotValid);
 		return;
 	}
 	NativeVotes_DisplayToAll(vote, 15);
