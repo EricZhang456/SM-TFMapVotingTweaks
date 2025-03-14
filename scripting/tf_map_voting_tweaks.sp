@@ -160,7 +160,7 @@ void StartMapVote(NativeVotesType voteType, int client, const char[] voteArgumen
 		NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_Waiting);
 		return;
 	}
-	// doesn't work
+	// work
 	if (voteType == NativeVotesType_NextLevel) {
 		if (g_cvChangeNextLevelAllowed.BoolValue && g_bNextLevelAlreadySet) {
 			NativeVotes_DisplayCallVoteFail(client, NativeVotesCallFail_LevelSet);
